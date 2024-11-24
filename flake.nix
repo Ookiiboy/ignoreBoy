@@ -22,9 +22,7 @@
       pkgs = import nixpkgs {inherit system;};
     in
       pkgs.alejandra);
-    checks = forAllSystems (system: let
-      pkgs = import nixpkgs {inherit system;};
-    in {
+    checks = forAllSystems (system: {
       pre-commit-check = pre-commit-hooks.lib.${system}.run {
         src = ./.;
         hooks = {
@@ -33,86 +31,90 @@
           deadnix.enable = true;
           statix.enable = true;
           flake-checker.enable = true;
-          # Deno
-          denofmt.enable = true;
-          denolint.enable = true;
-          # Shell Scripts
-          shellcheck.enable = true;
-          beautysh.enable = true;
-          # JSON
-          check-json.enable = true;
-          # Github Actions
-          actionlint.enable = true;
           # Generic - .editorconfig
           editorconfig-checker.enable = true;
-          check-toml.enable = true;
-          # CSS - .stylelint.json
-          stylelint = {
-            enable = true;
-            name = "Stylelint";
-            entry = "${pkgs.stylelint}/bin/stylelint --fix";
-            files = "\\.(css)$";
-            types = ["text" "css"];
-            language = "system";
-            pass_filenames = true;
-          };
         };
       };
     });
+
     devShells = forAllSystems (system: let
       pkgs = import nixpkgs {inherit system;};
-      gitIgnore = rec {
-        ignoreRepoFile = file:
-          pkgs.fetchFromGitHub {
-            owner = "github";
-            repo = "gitignore";
-            rev = "main";
-            hash = "sha256-A2n4LDn7nZ/Znj/ia6FbNZOYPLBylWQ034UrZqfoFLI=";
-          }
-          + /${file}.gitignore;
-
-        ignoreDirenv = pkgs.writeText "ignoreSelf" ''
-          .direnv/
-        '';
-        writeExtraConfig = extra:
-          pkgs.writeText "extraConfig" ''
-            # User Provided
-            ${extra}
-          '';
-        generateGitIgnore = settings:
-          pkgs.concatText ".gitignore" ([
-              ignoreDirenv
-              (
-                if builtins.hasAttr "extraConfig" settings
-                then writeExtraConfig settings.extraConfig
-                else false
-              )
-            ]
-            ++ map ignoreRepoFile settings.ignores);
-        # We can't link .gitignore files
-        place = settings: ''
-          cp -f ${generateGitIgnore settings} ./.gitignore
-        '';
-      };
     in {
       default = pkgs.mkShell {
         name = "development";
         shellHook = ''
           ln -sf ${editorconfig}/.editorconfig ./.editorconfig
           ${self.checks.${system}.pre-commit-check.shellHook}
-          ${gitIgnore.place {
-            ignores = ["Node" "C++" "Android" "C" "ChefCookbook" "CommonLisp" "Global/macOS" "Global/Windows"];
+          ${self.lib.${system}.gitignore {
+            ignores = [];
             extraConfig = ''
               .editorconfig
               .pre-commit-config.yaml
             '';
           }}
         '';
-        ENV = "dev";
-        buildInputs = with pkgs;
-          []
-          ++ self.checks.${system}.pre-commit-check.enabledPackages;
+        buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
       };
+    });
+
+    lib = forAllSystems (system: let
+      pkgs = import nixpkgs {inherit system;};
+    in rec {
+      ignoreRepoFile = file:
+        pkgs.fetchFromGitHub {
+          owner = "github";
+          repo = "gitignore";
+          rev = "main";
+          hash = "sha256-A2n4LDn7nZ/Znj/ia6FbNZOYPLBylWQ034UrZqfoFLI=";
+        }
+        + "/${file}.gitignore";
+
+      ignoreDirenv = pkgs.writeText "ignoreDirenv" ''
+        .direnv/
+      '';
+      saneDefaults = [
+        "Global/macOS"
+        "Global/Windows"
+        "Global/Linux"
+        "Global/Patch"
+        "community/Nix"
+      ];
+      writeExtraConfig = extra: [
+        (pkgs.writeText
+          "extraConfig"
+          ''
+            # User Provided
+            ${extra}
+          '')
+      ];
+      generateGitIgnore = settings:
+        pkgs.concatText ".gitignore" ([
+            ignoreDirenv
+          ]
+          ++
+          # User Defined
+          (
+            if builtins.hasAttr "extraConfig" settings
+            then writeExtraConfig settings.extraConfig
+            else []
+          )
+          # Sane Defaults - Ingested
+          ++ (
+            if (!settings ? useSaneDefaults || settings.useSaneDefaults)
+            then map ignoreRepoFile saneDefaults
+            else []
+          )
+          # Ingested Ignores
+          ++ (
+            if (builtins.hasAttr "ignores" settings)
+            then map ignoreRepoFile settings.ignores
+            else []
+          ));
+
+      # We can't link the file in the store. What a crime. Gotta copy.
+      gitignore = settings: ''
+        cp -f ${generateGitIgnore settings} ./.gitignore
+      '';
     });
   };
 }
