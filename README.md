@@ -23,7 +23,8 @@ There are a few interesting reasons that you might enjoy using this:
   of your todo list.
 - For the low-low price of using this, there are some
   [sane defaults built-in](https://github.com/Ookiiboy/ignoreBoy/blob/main/flake.nix#L71C1-L76C24).
-  All the stuff you forget to add (or forget to add), now added by default!
+  All the stuff you forget to add (or never add but should), now added by
+  default!
 - Did a goddamned Node.js project get added to your codebase by Alice. Don't
   know what to add to the `.gitignore`? Add `"Node"` to the array and be done
   with it.
