@@ -1,9 +1,17 @@
 # IgnoreBoy
+
 ## What is this?
-This is a nix-shell lib that helps you create best practiace `.gitignore` files by using [Githubs Default .gitignore Templates](https://github.com/github/gitignore). No longer will you be held back by the tyrany of copy and pasting shit from around the internet!
+
+This is a nix-shell lib that helps you create best practiace `.gitignore` files
+by using
+[Githubs Default .gitignore Templates](https://github.com/github/gitignore). No
+longer will you be held back by the tyrany of copy and pasting shit from around
+the internet!
 
 ## How do you use this?
-It should look something like the below. We've left out non-related code for brevity.
+
+It should look something like the below. We've left out non-related code for
+brevity.
 
 ```nix
 {
@@ -25,8 +33,12 @@ It should look something like the below. We've left out non-related code for bre
           shellHook = ''
             # ...
             ${ignoreBoy.lib.${system}.gitignore {
-              ignores = ["Node" "community/JavaScript/Vue"]; # https://github.com/github/gitignore - use this repo, and add the filename and/ or path/filename to the array 
-              useSaneDefaults = true; # Defaults to true, but you can set to false if you don't want OS related ignores
+              ignores = ["Node" "community/JavaScript/Vue"]; 
+              # https://github.com/github/gitignore - use this repo, and add 
+              # the filename and/ or path/filename to the array 
+              useSaneDefaults = true; 
+              # Defaults to true, but you can set to false if you don't want OS
+              # related ignores
               extraConfig = ''
                 # Anything Custom you might want to be placed here.
                 .editorconfig
@@ -41,7 +53,5 @@ It should look something like the below. We've left out non-related code for bre
         };
     });
     };
-  };
-}
-
+  }
 ```
