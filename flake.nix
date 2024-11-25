@@ -60,14 +60,14 @@
     lib = forAllSystems (system: let
       pkgs = import nixpkgs {inherit system;};
     in rec {
+      repo = pkgs.fetchFromGitHub {
+        owner = "github";
+        repo = "gitignore";
+        rev = "95c8bf079cf5600d967696c7f253e352ae77d83d";
+        hash = "sha256-A2n4LDn7nZ/Znj/ia6FbNZOYPLBylWQ034UrZqfoFLI=";
+      };
       ignoreRepoFile = file:
-        pkgs.fetchFromGitHub {
-          owner = "github";
-          repo = "gitignore";
-          rev = "main";
-          hash = "sha256-A2n4LDn7nZ/Znj/ia6FbNZOYPLBylWQ034UrZqfoFLI=";
-        }
-        + "/${file}.gitignore";
+        repo + "/${file}.gitignore";
 
       ignoreDirenv = pkgs.writeText "ignoreDirenv" ''
         .direnv/
