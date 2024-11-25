@@ -3,7 +3,8 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     systems.url = "github:nix-systems/default";
     pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
-    # Non-flake
+    gitignore-repo.url = "github:github/gitignore";
+    gitignore-repo.flake = false;
     editorconfig.url = "github:Ookiiboy/editor-config/";
     editorconfig.flake = false;
   };
@@ -14,6 +15,7 @@
     nixpkgs,
     pre-commit-hooks,
     editorconfig,
+    gitignore-repo,
     ...
   }: let
     forAllSystems = nixpkgs.lib.genAttrs (import systems);
@@ -60,14 +62,8 @@
     lib = forAllSystems (system: let
       pkgs = import nixpkgs {inherit system;};
     in rec {
-      repo = pkgs.fetchFromGitHub {
-        owner = "github";
-        repo = "gitignore";
-        rev = "95c8bf079cf5600d967696c7f253e352ae77d83d";
-        hash = "sha256-A2n4LDn7nZ/Znj/ia6FbNZOYPLBylWQ034UrZqfoFLI=";
-      };
       ignoreRepoFile = file:
-        repo + "/${file}.gitignore";
+        gitignore-repo + "/${file}.gitignore";
 
       ignoreDirenv = pkgs.writeText "ignoreDirenv" ''
         .direnv/

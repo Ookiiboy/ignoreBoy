@@ -35,7 +35,7 @@ brevity.
             ${ignoreBoy.lib.${system}.gitignore {
               ignores = ["Node" "community/JavaScript/Vue"]; 
               # https://github.com/github/gitignore - use this repo, and add 
-              # the filename and/ or path/filename to the array 
+              # the filename and/ or path/filename to the array, drop the extension.
               useSaneDefaults = true; 
               # Defaults to true, but you can set to false if you don't want OS
               # related ignores

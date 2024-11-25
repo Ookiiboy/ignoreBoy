@@ -53,6 +53,22 @@
         "type": "github"
       }
     },
+    "gitignore-repo": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1732409510,
+        "narHash": "sha256-A2n4LDn7nZ/Znj/ia6FbNZOYPLBylWQ034UrZqfoFLI=",
+        "owner": "github",
+        "repo": "gitignore",
+        "rev": "95c8bf079cf5600d967696c7f253e352ae77d83d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "github",
+        "repo": "gitignore",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1732238832,
@@ -125,6 +141,7 @@
     "root": {
       "inputs": {
         "editorconfig": "editorconfig",
+        "gitignore-repo": "gitignore-repo",
         "nixpkgs": "nixpkgs",
         "pre-commit-hooks": "pre-commit-hooks",
         "systems": "systems"
