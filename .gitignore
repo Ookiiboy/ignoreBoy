@@ -1,8 +1,4 @@
 .direnv/
-# User Provided
-.editorconfig
-.pre-commit-config.yaml
-
 # General
 .DS_Store
 .AppleDouble
@@ -71,3 +67,7 @@ $RECYCLE.BIN/
 # Ignore build outputs from performing a nix-build or `nix build` command
 result
 result-*
+# User Provided
+.editorconfig
+.pre-commit-config.yaml
+

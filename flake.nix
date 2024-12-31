@@ -87,13 +87,6 @@
         pkgs.concatText ".gitignore" ([
             ignoreDirenv
           ]
-          ++
-          # User Defined
-          (
-            if builtins.hasAttr "extraConfig" settings
-            then writeExtraConfig settings.extraConfig
-            else []
-          )
           # Sane Defaults - Ingested
           ++ (
             if (!settings ? useSaneDefaults || settings.useSaneDefaults)
@@ -104,6 +97,14 @@
           ++ (
             if (builtins.hasAttr "ignores" settings)
             then map ignoreRepoFile settings.ignores
+            else []
+          )
+          ++
+          # User Defined - These come last in the event that anything should be
+          # overridden.
+          (
+            if builtins.hasAttr "extraConfig" settings
+            then writeExtraConfig settings.extraConfig
             else []
           ));
 
