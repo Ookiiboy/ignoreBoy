@@ -63,6 +63,7 @@
       pkgs = import nixpkgs {inherit system;};
     in rec {
       ignoreRepoFile = file:
+      # ↓ By the way, how fucking cool is this?! ↓
         gitignore-repo + "/${file}.gitignore";
 
       ignoreDirenv = pkgs.writeText "ignoreDirenv" ''
