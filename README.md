@@ -47,8 +47,8 @@ your main devshell.
 #    the hash, re-run the shell, and copy the updated hash back into the 
 #    attribute after the next fail again. This will force the input to refresh,
 #    and make a new API request. Otherwise it will remain cached.
-# 4. Defaults to t`rue`, but you can set to false if you don't want OS related 
-#    ignores. You don't uusually need to specify. It's here for clarity.
+# 4. Defaults to `true`, but you can set to false if you don't want OS related 
+#    ignores. You don't usually need to specify. It's here for clarity.
 # 5. Anything custom you might want in your .gitignore you can place in this
 #    extraConfig.
 
