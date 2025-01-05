@@ -49,6 +49,8 @@
           ${self.checks.${system}.pre-commit-check.shellHook}
           ${self.lib.${system}.gitignore {
             github.languages = [];
+            gitignoreio.languages = [];
+            hash = "";
             extraConfig = ''
               .editorconfig
               .pre-commit-config.yaml
@@ -109,10 +111,17 @@
           )
           # API Derrived Ignores
           ++ (
-            if (builtins.hasAttr "gitignoreio" settings && builtins.hasAttr "languages" settings.gitignoreio)
+            if
+              (
+                builtins.hasAttr "gitignoreio" settings
+                && builtins.hasAttr "languages" settings.gitignoreio
+                # Since this is an API hit, it will return something on an empty
+                # array
+                && settings.gitignoreio.languages != []
+              )
             then [
               (toptalGitignoreIo {
-                inherit (settings) gitignore;
+                inherit (settings.gitignoreio) languages;
                 hash =
                   if (builtins.hasAttr "hash" settings.gitignoreio)
                   then settings.gitignoreio.hash
