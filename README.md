@@ -91,3 +91,6 @@ your main devshell.
     };
   }
 ```
+
+## People who've helped
+[arichtman](https://github.com/arichtman) - Started the work for the gitignore.io api.
