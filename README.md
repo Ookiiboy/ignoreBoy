@@ -5,7 +5,7 @@
 This is a nix-shell lib that helps you create best practice `.gitignore` files
 by using
 [Githubs Default .gitignore Templates](https://github.com/github/gitignore), 
-and/or [Toptal's gitignore.io](https://gitignore.io) No longer will you be held 
+and/or [Toptal's gitignore.io](https://gitignore.io). No longer will you be held 
 back by the tyrany of copy and pasting files from around the internet! Let this 
 copy paste for you!
 
