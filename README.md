@@ -10,7 +10,7 @@ the internet! Let this copy paste for you!
 
 ## Why would I use this? Like, my guy, I almost never touch my `.gitignore`.
 
-There are a few interesting reasons that you might enjoy using this:
+There are a few reasons that you might enjoy using this:
 
 - Codebases with diverse languages often tend to have a `.gitignore` that are
   sparse, and don't use best practices.
@@ -36,9 +36,26 @@ brevity. In short, add it to your inputs, and have it run in your shellhook of
 your main devshell.
 
 ```nix
+
+# 1. https://github.com/github/gitignore - use this repo, and add the filename
+#    and/ or path/filename to the array, drop the extension. Note the uppercase
+#    filenames.
+# 2. `curl -sL https://www.toptal.com/developers/gitignore/api/list`; this
+#    will give you a list of supported languages.
+# 3. GOTCHA: This will fail on first run, you will need to copy the hash into 
+#    the attribute. **Everytime** you update the `gitignoreio.languages`, delete
+#    the hash, re-run the shell, and copy the updated hash back into the 
+#    attribute after the next fail again. This will force the input to refresh,
+#    and make a new API request. Otherwise it will remain cached.
+# 4. Defaults to t`rue`, but you can set to false if you don't want OS related 
+#    ignores. You don't uusually need to specify. It's here for clarity.
+# 5. Anything custom you might want in your .gitignore you can place in this
+#    extraConfig.
+
 {
   inputs = {
     # ...
+    systems.url = "github:nix-systems/default";
     ignoreBoy.url = "github:Ookiiboy/ignoreBoy";
   };
 
@@ -55,17 +72,14 @@ your main devshell.
           shellHook = ''
             # ...
             ${ignoreBoy.lib.${system}.gitignore {
-              # https://github.com/github/gitignore - use this repo, and add 
-              # the filename and/ or path/filename to the array, drop the extension.
-              ignores = ["Node" "community/JavaScript/Vue"]; 
-              # Defaults to true, but you can set to false if you don't want OS
-              # related ignores
-              useSaneDefaults = true; 
-              # Anything custom you might want in your .gitignore you can place in extraConfig.
+              github.languages = ["Node" "community/JavaScript/Vue"]; # 1
+              gitignoreio.languages = ["node"]; # 2
+              gitignoreio.hash = ""; # 3
+              useSaneDefaults = true; # 4
               extraConfig = ''
                 .editorconfig
                 .pre-commit-config.yaml
-              '';
+              ''; # 5
             }}
             # ...
           '';

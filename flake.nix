@@ -48,7 +48,7 @@
           ln -sf ${editorconfig}/.editorconfig ./.editorconfig
           ${self.checks.${system}.pre-commit-check.shellHook}
           ${self.lib.${system}.gitignore {
-            ignores = [];
+            github.languages = [];
             extraConfig = ''
               .editorconfig
               .pre-commit-config.yaml
@@ -62,6 +62,19 @@
     lib = forAllSystems (system: let
       pkgs = import nixpkgs {inherit system;};
     in rec {
+      toptalGitignoreIo = arguments @ {
+        languages ? [],
+        hash ? "",
+        # Allow variadic arguments so we have one API
+        ...
+      }:
+        builtins.fetchurl {
+          url = "https://www.toptal.com/developers/gitignore/api/${pkgs.lib.concatStringsSep "," arguments.languages}";
+          name = "toptalGitignoreIo"; # Required as both "," and "%2C" are invalid store paths
+          # For some godforsaken reason arguments.hash bombs on missing property
+          sha256 = hash;
+        };
+
       ignoreRepoFile = file:
       # ↓ By the way, how fucking cool is this?! ↓
         gitignore-repo + "/${file}.gitignore";
@@ -94,10 +107,23 @@
             then map ignoreRepoFile saneDefaults
             else []
           )
-          # Ingested Ignores
+          # API Derrived Ignores
           ++ (
-            if (builtins.hasAttr "ignores" settings)
-            then map ignoreRepoFile settings.ignores
+            if (builtins.hasAttr "gitignoreio" settings && builtins.hasAttr "languages" settings.gitignoreio)
+            then [
+              (toptalGitignoreIo {
+                inherit (settings) gitignore;
+                hash =
+                  if (builtins.hasAttr "hash" settings.gitignoreio)
+                  then settings.gitignoreio.hash
+                  else "";
+              })
+            ]
+            else []
+          )
+          ++ (
+            if (builtins.hasAttr "github" settings && builtins.hasAttr "languages" settings.github)
+            then map ignoreRepoFile settings.github.languages
             else []
           )
           ++
