@@ -18,14 +18,12 @@
     gitignore-repo,
     ...
   }: let
-    forAllSystems = nixpkgs.lib.genAttrs (import systems);
+    forAllSystems = function: nixpkgs.lib.genAttrs (import systems) (system: function nixpkgs.legacyPackages.${system});
   in {
-    formatter = forAllSystems (system: let
-      pkgs = import nixpkgs {inherit system;};
-    in
-      pkgs.alejandra);
-    checks = forAllSystems (system: {
-      pre-commit-check = pre-commit-hooks.lib.${system}.run {
+    formatter = forAllSystems (pkgs: pkgs.alejandra);
+
+    checks = forAllSystems (pkgs: {
+      pre-commit-check = pre-commit-hooks.lib.${pkgs.system}.run {
         src = ./.;
         hooks = {
           # Nix
@@ -39,15 +37,13 @@
       };
     });
 
-    devShells = forAllSystems (system: let
-      pkgs = import nixpkgs {inherit system;};
-    in {
+    devShells = forAllSystems (pkgs: {
       default = pkgs.mkShell {
         name = "development";
         shellHook = ''
           ln -sf ${editorconfig}/.editorconfig ./.editorconfig
-          ${self.checks.${system}.pre-commit-check.shellHook}
-          ${self.lib.${system}.gitignore {
+          ${self.checks.${pkgs.system}.pre-commit-check.shellHook}
+          ${self.lib.${pkgs.system}.gitignore {
             github.languages = [];
             gitignoreio.languages = [];
             hash = "";
@@ -57,13 +53,11 @@
             '';
           }}
         '';
-        buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
+        buildInputs = self.checks.${pkgs.system}.pre-commit-check.enabledPackages;
       };
     });
 
-    lib = forAllSystems (system: let
-      pkgs = import nixpkgs {inherit system;};
-    in rec {
+    lib = forAllSystems (pkgs: rec {
       toptalGitignoreIo = arguments @ {
         languages ? [],
         hash ? "",
@@ -92,15 +86,14 @@
         "community/Nix"
       ];
       writeExtraConfig = extra: [
-        (pkgs.writeText
-          "extraConfig"
-          ''
-            # User Provided
-            ${extra}
-          '')
+        (pkgs.writeText "extraConfig" ''
+          # User Provided
+          ${extra}
+        '')
       ];
       generateGitIgnore = settings:
-        pkgs.concatText ".gitignore" ([
+        pkgs.concatText ".gitignore" (
+          [
             ignoreDirenv
           ]
           # Sane Defaults - Ingested
@@ -142,7 +135,8 @@
             if builtins.hasAttr "extraConfig" settings
             then writeExtraConfig settings.extraConfig
             else []
-          ));
+          )
+        );
 
       # We can't link the file in the store. What a crime. Gotta copy.
       gitignore = settings: ''
