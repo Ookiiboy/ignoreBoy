@@ -83,7 +83,7 @@
         "Global/Windows"
         "Global/Linux"
         "Global/Patch"
-        "community/Nix"
+        "Nix"
       ];
       writeExtraConfig = extra: [
         (pkgs.writeText "extraConfig" ''
