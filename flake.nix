@@ -21,7 +21,18 @@
     forAllSystems = function: nixpkgs.lib.genAttrs (import systems) (system: function nixpkgs.legacyPackages.${system});
   in {
     formatter = forAllSystems (pkgs: pkgs.alejandra);
-
+    packages = forAllSystems (pkgs: {
+      default = self.lib.${pkgs.system}.generateGitIgnore {
+        github.languages = [];
+        gitignoreio.languages = [];
+        hash = "";
+        extraConfig = ''
+          .editorconfig
+          .pre-commit-config.yaml
+        '';
+      };
+      ignore = self.lib.${pkgs.system}.gitignore;
+    });
     checks = forAllSystems (pkgs: {
       pre-commit-check = pre-commit-hooks.lib.${pkgs.system}.run {
         src = ./.;
@@ -139,8 +150,10 @@
         );
 
       # We can't link the file in the store. What a crime. Gotta copy.
-      gitignore = settings: ''
-        cp -f ${generateGitIgnore settings} ./.gitignore
+      gitignore = settings: let
+        ignoreFile = generateGitIgnore settings;
+      in ''
+        cp -f ${ignoreFile} ./.gitignore
       '';
     });
   };
