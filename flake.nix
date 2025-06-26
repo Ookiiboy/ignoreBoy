@@ -22,7 +22,7 @@
   in {
     formatter = forAllSystems (pkgs: pkgs.alejandra);
     packages = forAllSystems (pkgs: {
-      default = self.lib.${pkgs.system}.generateGitIgnore {
+      default = self.lib.${pkgs.system}.gitignore {
         github.languages = [];
         gitignoreio.languages = [];
         hash = "";
@@ -31,7 +31,6 @@
           .pre-commit-config.yaml
         '';
       };
-      ignore = self.lib.${pkgs.system}.gitignore;
     });
     checks = forAllSystems (pkgs: {
       pre-commit-check = pre-commit-hooks.lib.${pkgs.system}.run {
@@ -150,10 +149,8 @@
         );
 
       # We can't link the file in the store. What a crime. Gotta copy.
-      gitignore = settings: let
-        ignoreFile = generateGitIgnore settings;
-      in ''
-        cp -f ${ignoreFile} ./.gitignore
+      gitignore = settings: ''
+        cp -f ${generateGitIgnore settings} ./.gitignore
       '';
     });
   };
